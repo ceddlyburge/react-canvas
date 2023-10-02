@@ -4,11 +4,49 @@ import {
   DroppableContainer,
   rectIntersection,
 } from "@dnd-kit/core";
-import { RectMap } from "@dnd-kit/core/dist/store/types";
-import { ClientRect, Coordinates } from "@dnd-kit/core/dist/types";
+import { Over, RectMap } from "@dnd-kit/core/dist/store/types";
+import { ClientRect, Coordinates, Translate } from "@dnd-kit/core/dist/types";
 import { select } from "d3-selection";
 import { ZoomTransform, zoom, zoomIdentity } from "d3-zoom";
 import { ReactNode, useLayoutEffect, useMemo, useRef, useState } from "react";
+
+// to scale droppabe things to canvas
+/* <div
+    style{
+        transformOrigin: 'top left',
+        transform: `scale(${transform.k})`,
+      }
+></div> */
+
+export const calculateCanvasPosition = (
+  initialRect: DOMRect,
+  over: Over,
+  delta: Translate,
+  transform: ZoomTransform
+) =>
+  scaleCoordinates(
+    {
+      x: initialRect.x + delta.x - (over?.rect?.left ?? 0) - transform.x,
+      y: initialRect.y + delta.y - (over?.rect?.top ?? 0) - transform.y,
+    },
+    transform.k
+  );
+
+export const scaleCoordinates = (
+  coords: Coordinates,
+  scale: number
+): Coordinates => ({
+  x: coords.x / scale,
+  y: coords.y / scale,
+});
+
+export const snapCoordinates = ({ x, y }: Coordinates): Coordinates => ({
+  x: snapCoordinate(x, 10),
+  y: snapCoordinate(y, 10),
+});
+
+const snapCoordinate = (value: number, gridSize: number) =>
+  Math.round(value / gridSize) * gridSize;
 
 export const customCollisionDetectionStrategy = (): CollisionDetection => {
   return ({
