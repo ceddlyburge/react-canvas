@@ -1,6 +1,7 @@
 import {
   Active,
   CollisionDetection,
+  DndContext,
   DroppableContainer,
   rectIntersection,
 } from "@dnd-kit/core";
@@ -144,7 +145,15 @@ export const Canvas = ({ children }: { children?: ReactNode }) => {
           height: "300px",
         }}
       >
-        {children}
+        {/* This is for dragging around the canvas */}
+        <DndContext
+          sensors={sensors}
+          onDragStart={handleDragStart} // stores the activeCard
+          onDragMove={handleDragMove} // uses doCardsCollide (see "Cards should not overlap" later), updates pixelCoordinates
+          onDragEnd={handleDragEnd} // updates position of activeCard
+        >
+          {children}
+        </DndContext>
       </div>
     </div>
   );
