@@ -5,7 +5,19 @@ function App() {
   return (
     <>
       <h1>React Canvas</h1>
-      <Canvas></Canvas>
+      <Canvas>
+        <div
+          style={{
+            position: "absolute",
+            transformOrigin: "top left",
+            top: "10px",
+            left: "10px",
+            backgroundColor: "red",
+          }}
+        >
+          Hard coded card
+        </div>
+      </Canvas>
     </>
   );
 }
