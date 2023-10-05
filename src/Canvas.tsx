@@ -3,15 +3,29 @@ import {
   CollisionDetection,
   DndContext,
   DroppableContainer,
+  MouseSensor,
+  PointerSensor,
+  TouchSensor,
   rectIntersection,
+  useSensor,
+  useSensors,
 } from "@dnd-kit/core";
 import { Over, RectMap } from "@dnd-kit/core/dist/store/types";
-import { ClientRect, Coordinates, Translate } from "@dnd-kit/core/dist/types";
+import {
+  ClientRect,
+  Coordinates,
+  DragEndEvent,
+  DragMoveEvent,
+  DragStartEvent,
+  Translate,
+  UniqueIdentifier,
+} from "@dnd-kit/core/dist/types";
 import { select } from "d3-selection";
 import { ZoomTransform, zoom, zoomIdentity } from "d3-zoom";
-import { ReactNode, useLayoutEffect, useMemo, useRef, useState } from "react";
+import { useLayoutEffect, useMemo, useRef, useState } from "react";
+import { Draggable } from "./Draggable";
 
-// to scale droppabe things to canvas
+// to scale droppable things to canvas
 /* <div
     style{
         transformOrigin: 'top left',
@@ -102,8 +116,21 @@ export const customCollisionDetectionStrategy = (): CollisionDetection => {
   };
 };
 
-export const Canvas = ({ children }: { children?: ReactNode }) => {
+type Card = {
+  id: string;
+  pixelCoordinates: Coordinates;
+  text: string;
+};
+export const Canvas = () => {
   const canvasRef = useRef<HTMLDivElement | null>(null);
+
+  const [cards, setCards] = useState<Card[]>([
+    { id: "1", pixelCoordinates: { x: 0, y: 0 }, text: "hello" },
+  ]);
+  const [selectedItemId, setSelectedItemId] = useState<UniqueIdentifier | null>(
+    null
+  );
+  const [draggedItemOffset, setDraggedItemOffset] = useState({ x: 0, y: 0 });
 
   // store the current transform from d3
   const [transform, setTransform] = useState(zoomIdentity);
@@ -134,6 +161,45 @@ export const Canvas = ({ children }: { children?: ReactNode }) => {
   //     select<HTMLDivElement, unknown>(canvasRef.current).transition().duration(500)?.call(zoomBehavior.scaleBy, 1.5);
   // };
 
+  const mouseSensor = useSensor(MouseSensor);
+  const touchSensor = useSensor(TouchSensor);
+  const pointerSensor = useSensor(PointerSensor);
+  const sensors = useSensors(mouseSensor, touchSensor, pointerSensor);
+
+  const handleDragStart = ({ active }: DragStartEvent) => {
+    setSelectedItemId(active.id);
+  };
+
+  const handleDragMove = ({ delta }: DragMoveEvent) => {
+    if (!delta.x && !delta.y) return;
+
+    const deltaAsCanvasCoords = scaleCoordinates(delta, transform.k);
+
+    setDraggedItemOffset(deltaAsCanvasCoords);
+  };
+
+  const handleDragEnd = ({ delta, active }: DragEndEvent) => {
+    setSelectedItemId(null);
+    setDraggedItemOffset({ x: 0, y: 0 });
+
+    if (!delta.x && !delta.y) return;
+
+    setCards(
+      cards.map((card) => {
+        if (card.id === active.id) {
+          return {
+            ...card,
+            pixelCoordinates: {
+              x: card.pixelCoordinates.x + delta.x,
+              y: card.pixelCoordinates.y + delta.y,
+            },
+          };
+        }
+        return card;
+      })
+    );
+  };
+
   return (
     <div ref={canvasRef} style={{ backgroundColor: "gray" }}>
       <div
@@ -152,7 +218,15 @@ export const Canvas = ({ children }: { children?: ReactNode }) => {
           onDragMove={handleDragMove} // uses doCardsCollide (see "Cards should not overlap" later), updates pixelCoordinates
           onDragEnd={handleDragEnd} // updates position of activeCard
         >
-          {children}
+          {cards.map((card) => (
+            <Draggable
+              id={card.id}
+              pixelCoordinates={card.pixelCoordinates}
+              key={card.id}
+            >
+              {card.text}
+            </Draggable>
+          ))}
         </DndContext>
       </div>
     </div>
