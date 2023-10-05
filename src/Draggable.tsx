@@ -5,17 +5,14 @@ import { ReactNode } from "react";
 export const Draggable = ({
   id,
   pixelCoordinates,
-  // k,
   children,
 }: {
   id: string;
   pixelCoordinates: Coordinates;
-  // k,
   children?: ReactNode;
 }) => {
   const { attributes, listeners, setNodeRef, transform } = useDraggable({
     id,
-    data: { pixelCoordinates, id },
   });
 
   return (
@@ -28,7 +25,9 @@ export const Draggable = ({
         left: `${pixelCoordinates.x}px`,
         // temporary change to this position when dragging
         ...(transform
-          ? { transform: `translate3d(${transform.x}, ${transform.y}, 0)` }
+          ? {
+              transform: `translate3d(${transform.x}px, ${transform.y}px, 0px)`,
+            }
           : undefined),
       }}
       ref={setNodeRef}

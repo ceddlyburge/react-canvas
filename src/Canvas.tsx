@@ -15,10 +15,7 @@ import {
   ClientRect,
   Coordinates,
   DragEndEvent,
-  DragMoveEvent,
-  DragStartEvent,
   Translate,
-  UniqueIdentifier,
 } from "@dnd-kit/core/dist/types";
 import { select } from "d3-selection";
 import { ZoomTransform, zoom, zoomIdentity } from "d3-zoom";
@@ -127,10 +124,6 @@ export const Canvas = () => {
   const [cards, setCards] = useState<Card[]>([
     { id: "1", pixelCoordinates: { x: 0, y: 0 }, text: "hello" },
   ]);
-  const [selectedItemId, setSelectedItemId] = useState<UniqueIdentifier | null>(
-    null
-  );
-  const [draggedItemOffset, setDraggedItemOffset] = useState({ x: 0, y: 0 });
 
   // store the current transform from d3
   const [transform, setTransform] = useState(zoomIdentity);
@@ -166,22 +159,7 @@ export const Canvas = () => {
   const pointerSensor = useSensor(PointerSensor);
   const sensors = useSensors(mouseSensor, touchSensor, pointerSensor);
 
-  const handleDragStart = ({ active }: DragStartEvent) => {
-    setSelectedItemId(active.id);
-  };
-
-  const handleDragMove = ({ delta }: DragMoveEvent) => {
-    if (!delta.x && !delta.y) return;
-
-    const deltaAsCanvasCoords = scaleCoordinates(delta, transform.k);
-
-    setDraggedItemOffset(deltaAsCanvasCoords);
-  };
-
   const handleDragEnd = ({ delta, active }: DragEndEvent) => {
-    setSelectedItemId(null);
-    setDraggedItemOffset({ x: 0, y: 0 });
-
     if (!delta.x && !delta.y) return;
 
     setCards(
@@ -214,8 +192,6 @@ export const Canvas = () => {
         {/* This is for dragging around the canvas */}
         <DndContext
           sensors={sensors}
-          onDragStart={handleDragStart} // stores the activeCard
-          onDragMove={handleDragMove} // uses doCardsCollide (see "Cards should not overlap" later), updates pixelCoordinates
           onDragEnd={handleDragEnd} // updates position of activeCard
         >
           {cards.map((card) => (
