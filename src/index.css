@@ -1,4 +1,24 @@
-.card {
-  position: "absolute";
-  transform-origin: "top left";
+.card, .trayCard, .trayOverlayCard {
+  padding: 10px;
+  border-radius: 3px;
+  border-color:chocolate;
+  border-width: 1px;
+  border-style: solid;
+  background-color:bisque;
+  color:black;
+}
+
+.tray {
+  display: flex;
+  margin-bottom: 10px;
+  flex-wrap: wrap;
+}
+
+
+.canvas {
+  background-color:snow;
+  border-radius: 3px;
+  border-color:chocolate;
+  border-width: 1px;
+  border-style: solid;
 }

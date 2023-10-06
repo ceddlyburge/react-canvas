@@ -17,6 +17,7 @@ export const Draggable = ({
 
   return (
     <div
+      className="card"
       // position of card on canvas
       style={{
         position: "absolute",

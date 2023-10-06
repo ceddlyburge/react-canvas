@@ -7,6 +7,7 @@ import {
   PointerSensor,
   TouchSensor,
   rectIntersection,
+  useDroppable,
   useSensor,
   useSensors,
 } from "@dnd-kit/core";
@@ -21,6 +22,7 @@ import { select } from "d3-selection";
 import { ZoomTransform, zoom, zoomIdentity } from "d3-zoom";
 import { useLayoutEffect, useMemo, useRef, useState } from "react";
 import { Draggable } from "./Draggable";
+import { Card } from "./TrayAndCanvas";
 
 // to scale droppable things to canvas
 /* <div
@@ -113,17 +115,24 @@ export const customCollisionDetectionStrategy = (): CollisionDetection => {
   };
 };
 
-type Card = {
-  id: string;
-  pixelCoordinates: Coordinates;
-  text: string;
-};
-export const Canvas = () => {
+export const Canvas = ({
+  cards,
+  setCards,
+}: {
+  cards: Card[];
+  setCards: (cards: Card[]) => void;
+}) => {
   const canvasRef = useRef<HTMLDivElement | null>(null);
 
-  const [cards, setCards] = useState<Card[]>([
-    { id: "1", pixelCoordinates: { x: 0, y: 0 }, text: "hello" },
-  ]);
+  const { setNodeRef } = useDroppable({
+    id: "canvas",
+  });
+
+  const updateAndForwardRef = (div: HTMLDivElement) => {
+    canvasRef.current = div;
+    // setCanvasElement(div);
+    setNodeRef(div);
+  };
 
   // store the current transform from d3
   const [transform, setTransform] = useState(zoomIdentity);
@@ -179,7 +188,7 @@ export const Canvas = () => {
   };
 
   return (
-    <div ref={canvasRef} style={{ backgroundColor: "gray" }}>
+    <div ref={updateAndForwardRef} className="canvas">
       <div
         style={{
           // apply the transform from d3
@@ -196,7 +205,7 @@ export const Canvas = () => {
         >
           {cards.map((card) => (
             <Draggable
-              id={card.id}
+              id={card.id.toString()}
               pixelCoordinates={card.pixelCoordinates}
               key={card.id}
             >
