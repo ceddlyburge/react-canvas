@@ -130,7 +130,6 @@ export const Canvas = ({
 
   const updateAndForwardRef = (div: HTMLDivElement) => {
     canvasRef.current = div;
-    // setCanvasElement(div);
     setNodeRef(div);
   };
 
@@ -141,6 +140,8 @@ export const Canvas = ({
   const updateTransform = ({ transform }: { transform: ZoomTransform }) => {
     setTransform(transform);
   };
+
+  console.log(transform);
 
   // create the d3 zoom object, and useMemo to retain it for rerenders
   const zoomBehavior = useMemo(() => zoom<HTMLDivElement, unknown>(), []);
@@ -157,11 +158,14 @@ export const Canvas = ({
   }, [zoomBehavior, canvasRef]);
 
   // animated Zoom In, which can be called from a button event (not shown in this example)
-  // const zoomIn = () => {
-  //     if (!canvasRef.current) return;
+  const zoomIn = () => {
+    if (!canvasRef.current) return;
 
-  //     select<HTMLDivElement, unknown>(canvasRef.current).transition().duration(500)?.call(zoomBehavior.scaleBy, 1.5);
-  // };
+    select<HTMLDivElement, unknown>(canvasRef.current)
+      .transition()
+      .duration(500)
+      ?.call(zoomBehavior.scaleBy, 1.5);
+  };
 
   const mouseSensor = useSensor(MouseSensor);
   const touchSensor = useSensor(TouchSensor);
@@ -188,32 +192,39 @@ export const Canvas = ({
   };
 
   return (
-    <div ref={updateAndForwardRef} className="canvas">
-      <div
-        style={{
-          // apply the transform from d3
-          transformOrigin: "top left",
-          transform: `translate3d(${transform.x}, ${transform.y}, ${transform.k})`,
-          position: "relative",
-          height: "300px",
-        }}
-      >
-        {/* This is for dragging around the canvas */}
-        <DndContext
-          sensors={sensors}
-          onDragEnd={handleDragEnd} // updates position of activeCard
-        >
-          {cards.map((card) => (
-            <Draggable
-              id={card.id.toString()}
-              pixelCoordinates={card.pixelCoordinates}
-              key={card.id}
-            >
-              {card.text}
-            </Draggable>
-          ))}
-        </DndContext>
+    <>
+      <div>
+        <button onClick={zoomIn}>Zoom In</button>
       </div>
-    </div>
+      <div ref={updateAndForwardRef} className="canvasWindow">
+        <div
+          className="canvas"
+          style={{
+            // apply the transform from d3
+            transformOrigin: "top left",
+            transform: `translate3d(${transform.x}px, ${transform.y}px, ${transform.k}px)`,
+            // transform: `translate3d(10px, 10px, 10px)`,
+            position: "relative",
+            height: "300px",
+          }}
+        >
+          {/* This is for dragging around the canvas */}
+          <DndContext
+            sensors={sensors}
+            onDragEnd={handleDragEnd} // updates position of activeCard
+          >
+            {cards.map((card) => (
+              <Draggable
+                id={card.id.toString()}
+                pixelCoordinates={card.pixelCoordinates}
+                key={card.id}
+              >
+                {card.text}
+              </Draggable>
+            ))}
+          </DndContext>
+        </div>
+      </div>
+    </>
   );
 };

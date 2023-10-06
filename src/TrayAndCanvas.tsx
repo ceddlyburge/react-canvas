@@ -1,7 +1,6 @@
 import {
   DndContext,
   DragEndEvent,
-  DragMoveEvent,
   DragOverlay,
   DragStartEvent,
   MouseSensor,
@@ -22,12 +21,10 @@ const fridgePoetryWords = [
   "time",
   "it",
   "and",
-  "of",
   "very",
   "wish",
   "run",
   "person",
-  "I",
   "that",
   "in",
   "quite",
@@ -155,7 +152,6 @@ const fridgePoetryWords = [
   "someone",
   "nor",
   "during",
-  "a",
   "bit",
   "sort",
   "of",
@@ -164,15 +160,14 @@ const fridgePoetryWords = [
   "themselves",
   "like",
   "without",
-  "a",
   "little",
+  "a",
   "is",
   "find",
   "group",
   "everyone",
   "once",
   "before",
-  "a",
   "lot",
   "was",
   "tell",
@@ -181,13 +176,11 @@ const fridgePoetryWords = [
   "unless",
   "under",
   "were",
-  "and",
   "ask",
   "fact",
   "anyone",
   "now",
   "around",
-  "and",
   "school",
   "can",
   "could",
@@ -264,42 +257,28 @@ export const TrayAndCanvas = () => {
     ]);
   };
 
-  const handleDragMove = ({ over, active, delta }: DragMoveEvent) => {
-    // const { initialRect, card } = extractTrayCardInfo(active);
-    // setIsDragging(over?.id === 'canvas');
-    // if (
-    //   card.id === addFrameDraggableId &&
-    //   distanceMoved(delta) > dragActivationDistance
-    // ) {
-    //   setIsDraggingAddFrameButton(true);
-    // }
-    // if (over?.id === 'canvas') {
-    //   const gridPosition = calculateGridPosition(initialRect, over, delta);
-    //   setTrayCardUnderlayGridCoordinates(gridPosition);
-    //   setCollidingBoardCardIds(
-    //     getCollidingIds({ ...card, ...gridPosition }, boardItems)
-    //   );
-    // }
-  };
-
   /* This DndContext is for dragging onto the canvas */
   return (
     <DndContext
       sensors={sensors}
-      onDragStart={handleDragStart} // stores the activeCard
-      onDragMove={handleDragMove} // uses doCardsCollide (see "Cards should not overlap" later)
-      onDragEnd={handleDragEnd} // uses calculateCanvasPosition, adds activeCard to children
-      // collisionDetection={customCollisionDetectionStrategy()}
+      onDragStart={handleDragStart} // store the active card in state
+      onDragEnd={handleDragEnd} // add the active card to the canvas
     >
       <div className="tray">
-        {fridgePoetryWords.map((word) => (
-          <Addable id={word} key={word}>
-            <div className="trayCard">{word}</div>
-          </Addable>
-        ))}
+        {fridgePoetryWords.map((word) => {
+          if (cards.find((card) => card.id === word)) return null;
+
+          return (
+            <Addable id={word}>
+              <div className="trayCard">{word}</div>
+            </Addable>
+          );
+        })}
       </div>
+
       <Canvas cards={cards} setCards={setCards}></Canvas>
-      <DragOverlay dropAnimation={{ duration: 0, easing: "ease" }}>
+
+      <DragOverlay>
         <div className="trayOverlayCard">{activeId}</div>
       </DragOverlay>
     </DndContext>

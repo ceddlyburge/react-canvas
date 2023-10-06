@@ -6,6 +6,7 @@
   border-style: solid;
   background-color:bisque;
   color:black;
+  cursor: grab
 }
 
 .tray {
@@ -14,11 +15,11 @@
   flex-wrap: wrap;
 }
 
-
-.canvas {
-  background-color:snow;
+.canvasWindow {
+  overflow: hidden;
   border-radius: 3px;
   border-color:chocolate;
   border-width: 1px;
   border-style: solid;
+  background-color:snow;
 }
