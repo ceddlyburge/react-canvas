@@ -1,4 +1,5 @@
 .card, .trayCard, .trayOverlayCard {
+  box-sizing: content-box;
   padding: 10px;
   border-radius: 3px;
   border-color:chocolate;

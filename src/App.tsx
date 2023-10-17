@@ -1,4 +1,3 @@
-import "./App.css";
 import { TrayAndCanvas } from "./TrayAndCanvas";
 
 function App() {

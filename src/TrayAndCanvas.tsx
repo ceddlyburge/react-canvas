@@ -15,6 +15,7 @@ import { Canvas } from "./Canvas";
 import { Addable } from "./Addable";
 import { useState } from "react";
 import { Coordinates, Translate, ClientRect } from "@dnd-kit/core/dist/types";
+import { ZoomTransform, zoomIdentity } from "d3-zoom";
 
 const fridgePoetryWords = [
   "walk",
@@ -197,27 +198,34 @@ export type Card = {
   text: string;
 };
 
-// const calculateGridPosition = (
-//   initialRect: DOMRect,
-//   over: Over,
-//   delta: Translate
-// ): Coordinates =>
-//   scaleCoordinates(
-//     {
-//       x: initialRect.x + delta.x - (over?.rect?.left ?? 0) - transform.x,
-//       y: initialRect.y + delta.y - (over?.rect?.top ?? 0) - transform.y,
-//     },
-//     transform.k
-//   );
+const scaleCoordinates = (coords: Coordinates, scale: number): Coordinates => ({
+  x: coords.x / scale,
+  y: coords.y / scale,
+});
 
 const calculateCanvasPosition = (
   initialRect: ClientRect,
   over: Over,
-  delta: Translate
-): Coordinates => ({
-  x: initialRect.left + delta.x - (over?.rect?.left ?? 0),
-  y: initialRect.top + delta.y - (over?.rect?.top ?? 0),
-});
+  delta: Translate,
+  transform: ZoomTransform
+): Coordinates =>
+  scaleCoordinates(
+    {
+      x: initialRect.left + delta.x - (over?.rect?.left ?? 0) - transform.x,
+      y: initialRect.top + delta.y - (over?.rect?.top ?? 0) - transform.y,
+    },
+    transform.k
+  );
+
+// this works when there is no pan / zoom for the canvas
+// const calculateCanvasPosition = (
+//   initialRect: ClientRect,
+//   over: Over,
+//   delta: Translate
+// ): Coordinates => ({
+//   x: initialRect.left + delta.x - (over?.rect?.left ?? 0),
+//   y: initialRect.top + delta.y - (over?.rect?.top ?? 0),
+// });
 
 export const TrayAndCanvas = () => {
   const mouseSensor = useSensor(MouseSensor);
@@ -226,6 +234,8 @@ export const TrayAndCanvas = () => {
   const sensors = useSensors(mouseSensor, touchSensor, pointerSensor);
 
   const [activeId, setActiveId] = useState<UniqueIdentifier | null>(null);
+  // store the current transform from d3
+  const [transform, setTransform] = useState(zoomIdentity);
 
   const [cards, setCards] = useState<Card[]>([
     { id: "Hello", pixelCoordinates: { x: 0, y: 0 }, text: "Hello" },
@@ -250,7 +260,8 @@ export const TrayAndCanvas = () => {
         pixelCoordinates: calculateCanvasPosition(
           active.rect.current.initial,
           over,
-          delta
+          delta,
+          transform
         ),
         text: active.id.toString(),
       },
@@ -276,7 +287,12 @@ export const TrayAndCanvas = () => {
         })}
       </div>
 
-      <Canvas cards={cards} setCards={setCards}></Canvas>
+      <Canvas
+        cards={cards}
+        setCards={setCards}
+        transform={transform}
+        setTransform={setTransform}
+      ></Canvas>
 
       <DragOverlay>
         <div className="trayOverlayCard">{activeId}</div>
