@@ -37,6 +37,10 @@ export const Draggable = ({
       ref={setNodeRef}
       {...listeners}
       {...attributes}
+      onPointerDown={(e) => {
+        listeners?.onPointerDown?.(e);
+        e.preventDefault();
+      }}
     >
       {children}
     </div>
