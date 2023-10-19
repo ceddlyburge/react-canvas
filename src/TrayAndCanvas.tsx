@@ -3,19 +3,14 @@ import {
   DragEndEvent,
   DragOverlay,
   DragStartEvent,
-  MouseSensor,
   Over,
-  PointerSensor,
-  TouchSensor,
   UniqueIdentifier,
-  useSensor,
-  useSensors,
 } from "@dnd-kit/core";
-import { Canvas } from "./Canvas";
-import { Addable } from "./Addable";
-import { useState } from "react";
-import { Coordinates, Translate, ClientRect } from "@dnd-kit/core/dist/types";
+import { ClientRect, Coordinates, Translate } from "@dnd-kit/core/dist/types";
 import { ZoomTransform, zoomIdentity } from "d3-zoom";
+import { useState } from "react";
+import { Addable } from "./Addable";
+import { Canvas } from "./Canvas";
 
 const fridgePoetryWords = [
   "walk",
@@ -228,11 +223,6 @@ const calculateCanvasPosition = (
 // });
 
 export const TrayAndCanvas = () => {
-  const mouseSensor = useSensor(MouseSensor);
-  const touchSensor = useSensor(TouchSensor);
-  const pointerSensor = useSensor(PointerSensor);
-  const sensors = useSensors(mouseSensor, touchSensor, pointerSensor);
-
   const [activeId, setActiveId] = useState<UniqueIdentifier | null>(null);
   // store the current transform from d3
   const [transform, setTransform] = useState(zoomIdentity);
@@ -271,7 +261,6 @@ export const TrayAndCanvas = () => {
   /* This DndContext is for dragging onto the canvas */
   return (
     <DndContext
-      sensors={sensors}
       onDragStart={handleDragStart} // store the active card in state
       onDragEnd={handleDragEnd} // add the active card to the canvas
     >
@@ -292,10 +281,18 @@ export const TrayAndCanvas = () => {
         setCards={setCards}
         transform={transform}
         setTransform={setTransform}
-      ></Canvas>
+      />
 
       <DragOverlay>
-        <div className="trayOverlayCard">{activeId}</div>
+        <div
+          style={{
+            transformOrigin: "top left",
+            transform: `scale(${transform.k})`,
+          }}
+          className="trayOverlayCard"
+        >
+          {activeId}
+        </div>
       </DragOverlay>
     </DndContext>
   );

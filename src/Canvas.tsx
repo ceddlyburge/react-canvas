@@ -1,12 +1,4 @@
-import {
-  DndContext,
-  MouseSensor,
-  PointerSensor,
-  TouchSensor,
-  useDroppable,
-  useSensor,
-  useSensors,
-} from "@dnd-kit/core";
+import { DndContext, useDroppable } from "@dnd-kit/core";
 import { DragEndEvent } from "@dnd-kit/core/dist/types";
 import { select } from "d3-selection";
 import { ZoomTransform, zoom } from "d3-zoom";
@@ -76,11 +68,6 @@ export const Canvas = ({
       ?.call(zoomBehavior.scaleBy, 1.5);
   };
 
-  const mouseSensor = useSensor(MouseSensor);
-  const touchSensor = useSensor(TouchSensor);
-  const pointerSensor = useSensor(PointerSensor);
-  const sensors = useSensors(mouseSensor, touchSensor, pointerSensor);
-
   const handleDragEnd = ({ delta, active }: DragEndEvent) => {
     if (!delta.x && !delta.y) return;
 
@@ -118,7 +105,6 @@ export const Canvas = ({
         >
           {/* This is for dragging around the canvas */}
           <DndContext
-            sensors={sensors}
             onDragEnd={handleDragEnd} // updates position of activeCard
           >
             {cards.map((card) => (
